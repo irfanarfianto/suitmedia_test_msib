@@ -37,12 +37,12 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Nama'),
+              decoration: InputDecoration(labelText: 'Name'),
             ),
             SizedBox(height: 16.0),
             TextField(
               controller: sentenceController,
-              decoration: InputDecoration(labelText: 'Kalimat'),
+              decoration: InputDecoration(labelText: 'Sentence'),
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
@@ -57,8 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text('Input tidak valid'),
-                      content: Text('Pastikan kedua input tidak kosong.'),
+                      title: Text('Invalid Input'),
+                      content: Text('Make sure both inputs are not empty.'),
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
               },
-              child: Text('Periksa'),
+              child: Text('Check'),
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
@@ -81,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(
                     builder: (context) => SecondScreen(
                       name: nameController.text,
-                      selectedUser: null,
                     ),
                   ),
                 );

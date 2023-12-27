@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ThirdScreen extends StatefulWidget {
   @override
@@ -19,12 +19,9 @@ class _ThirdScreenState extends State<ThirdScreen> {
     super.initState();
     _loadData();
 
-    // Add a listener to the scroll controller
     _scrollController.addListener(() {
-      // Check if the user has scrolled to the bottom
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        // Load more data when reaching the bottom
         _loadData();
       }
     });
@@ -64,7 +61,34 @@ class _ThirdScreenState extends State<ThirdScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Third Screen'),
+        centerTitle: true,
+        title: Text(
+          'Third Screen',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF04021D),
+            fontSize: 18,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            height: 0.08,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: Color(0XFF554AF0),
+          ), 
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(1.0), 
+          child: Divider(
+            color: Color(0xFFDCDCDC), 
+            thickness: 0.5,
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -78,15 +102,53 @@ class _ThirdScreenState extends State<ThirdScreen> {
                   if (index == users.length) {
                     return _buildLoader();
                   } else {
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(users[index].avatar),
+                    return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+                            leading: ClipOval(
+                              child: Image.network(
+                                users[index].avatar,
+                                width: 49.0,
+                                height: 49.0,
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                            title: Text(
+                              '${users[index].firstName} ${users[index].lastName}',
+                              style: TextStyle(
+                                color: Color(0xFF04021D),
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                height: 0,
+                              ),
+                            ),
+                            subtitle: Text(
+                              users[index].email.toUpperCase(),
+                              style: TextStyle(
+                                color: Color(0xFF686777),
+                                fontSize: 10,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                height: 0,
+                              ),
+                            ),
+                            onTap: () {
+                              _handleUserTap(
+                                '${users[index].firstName} ${users[index].lastName}',
+                              );
+                            },
+                          ),
+                          Divider(
+                            height: 1,
+                            thickness: 0.5,
+                            color: Color(0xFFDCDCDC),
+                          ),
+                        ],
                       ),
-                      title: Text(users[index].firstName),
-                      subtitle: Text(users[index].email),
-                      onTap: () {
-                        _handleUserTap(users[index].firstName);
-                      },
                     );
                   }
                 },
@@ -99,33 +161,44 @@ class _ThirdScreenState extends State<ThirdScreen> {
   }
 
   Widget _buildLoader() {
-    return isLoading
-        ? Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
-        : users.isEmpty
-            ? Center(
-                child: Text('Tidak ada pengguna yang ditemukan.'),
-              )
-            : Container();
+    if (isLoading) {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    } else if (users.isEmpty) {
+      return Center(
+        child: Text('No users found.'),
+      );
+    } else {
+      return Container(); 
+    }
   }
 
   Future<void> _handleRefresh() async {
-    // Reset the page count and clear the existing users
-    setState(() {
-      page = 1;
-      users.clear();
-    });
+    try {
+      setState(() {
+        page = 1;
+        users.clear();
+      });
 
-    // Load data again
-    await _loadData();
+
+      await _loadData();
+    } catch (e) {
+
+      print('Error during refresh: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to refresh data. Please try again.'),
+        ),
+      );
+    }
   }
 
   void _handleUserTap(String selectedUserName) {
-    // Replace the selected user's name in the Second Screen
+    print('Selected User Name: $selectedUserName');
     Navigator.pop(context, selectedUserName);
   }
 }
