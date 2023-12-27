@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 16.0),
               buildTextField(
                 controller: sentenceController,
-                hintText: 'Sentence',
+                hintText: 'Palindrome',
                 focusNode: sentenceFocusNode,
               ),
               SizedBox(height: 16.0),
@@ -71,14 +71,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   handleCheckButton();
                 },
-                label: 'Check',
+                label: 'CHECK',
               ),
               SizedBox(height: 16.0),
               buildElevatedButton(
                 onPressed: () {
                   navigateToSecondScreen(context);
                 },
-                label: 'Next',
+                label: 'NEXT',
               ),
             ],
           ),
@@ -124,6 +124,12 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: hintText,
+          hintStyle: TextStyle(
+            color: Color(0x5B686777),
+            fontSize: 16,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
