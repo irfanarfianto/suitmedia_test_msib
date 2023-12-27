@@ -7,10 +7,13 @@ class ThirdScreen extends StatefulWidget {
   _ThirdScreenState createState() => _ThirdScreenState();
 }
 
+const String apiUrl = 'https://reqres.in/api/users';
+
 class _ThirdScreenState extends State<ThirdScreen> {
   List<User> users = [];
   bool isLoading = false;
   int page = 1;
+  bool isRefreshing = false;
 
   ScrollController _scrollController = ScrollController();
 
@@ -32,8 +35,8 @@ class _ThirdScreenState extends State<ThirdScreen> {
       isLoading = true;
     });
 
-    final response = await http
-        .get(Uri.parse('https://reqres.in/api/users?page=$page&per_page=11'));
+    final response =
+        await http.get(Uri.parse('$apiUrl?page=$page&per_page=11'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -60,103 +63,64 @@ class _ThirdScreenState extends State<ThirdScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Third Screen',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF04021D),
-            fontSize: 18,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            height: 0.08,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Color(0XFF554AF0),
-          ), 
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.0), 
-          child: Divider(
-            color: Color(0xFFDCDCDC), 
-            thickness: 0.5,
-          ),
+      appBar: buildAppBar(),
+      body: buildBody(),
+    );
+  }
+
+  AppBar buildAppBar() {
+    return AppBar(
+      centerTitle: true,
+      title: Text(
+        'Third Screen',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Color(0xFF04021D),
+          fontSize: 18,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w600,
+          height: 0.08,
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _handleRefresh,
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: users.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == users.length) {
-                    return _buildLoader();
-                  } else {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0),
-                            leading: ClipOval(
-                              child: Image.network(
-                                users[index].avatar,
-                                width: 49.0,
-                                height: 49.0,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            title: Text(
-                              '${users[index].firstName} ${users[index].lastName}',
-                              style: TextStyle(
-                                color: Color(0xFF04021D),
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                height: 0,
-                              ),
-                            ),
-                            subtitle: Text(
-                              users[index].email.toUpperCase(),
-                              style: TextStyle(
-                                color: Color(0xFF686777),
-                                fontSize: 10,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                height: 0,
-                              ),
-                            ),
-                            onTap: () {
-                              _handleUserTap(
-                                '${users[index].firstName} ${users[index].lastName}',
-                              );
-                            },
-                          ),
-                          Divider(
-                            height: 1,
-                            thickness: 0.5,
-                            color: Color(0xFFDCDCDC),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
+      leading: IconButton(
+        icon: Icon(
+          Icons.arrow_back_ios_new,
+          color: Color(0XFF554AF0),
+        ),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(1.0),
+        child: Divider(
+          color: Color(0xFFDCDCDC),
+          thickness: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget buildBody() {
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _handleRefresh,
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: users.length + 1,
+              itemBuilder: (context, index) {
+                if (index == users.length) {
+                  return _buildLoader();
+                } else {
+                  return buildUserTile(users[index]);
+                }
+              },
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -173,27 +137,83 @@ class _ThirdScreenState extends State<ThirdScreen> {
         child: Text('No users found.'),
       );
     } else {
-      return Container(); 
+      return Container();
     }
+  }
+
+  Widget buildUserTile(User user) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+            leading: ClipOval(
+              child: Image.network(
+                user.avatar,
+                width: 49.0,
+                height: 49.0,
+                fit: BoxFit.fill,
+              ),
+            ),
+            title: Text(
+              '${user.firstName} ${user.lastName}',
+              style: TextStyle(
+                color: Color(0xFF04021D),
+                fontSize: 16,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                height: 0,
+              ),
+            ),
+            subtitle: Text(
+              user.email.toUpperCase(),
+              style: TextStyle(
+                color: Color(0xFF686777),
+                fontSize: 10,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                height: 0,
+              ),
+            ),
+            onTap: () {
+              _handleUserTap('${user.firstName} ${user.lastName}');
+            },
+          ),
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: Color(0xFFDCDCDC),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleRefresh() async {
     try {
+      if (isRefreshing) {
+        return;
+      }
+
       setState(() {
+        isRefreshing = true;
         page = 1;
         users.clear();
       });
 
-
       await _loadData();
     } catch (e) {
-
       print('Error during refresh: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to refresh data. Please try again.'),
         ),
       );
+    } finally {
+      setState(() {
+        isRefreshing = false;
+      });
     }
   }
 
